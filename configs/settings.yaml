@@ -1,0 +1,29 @@
+local_first: true
+db: sqlite:///eaos.db
+llm:
+  providers:
+    - name: local
+      model: llama3-8b
+      endpoint: http://localhost:11434/api/generate
+      cost_per_1k_tokens: 0.0
+      privacy: high
+    - name: cloud
+      model: gpt-4o-mini
+      endpoint: https://api.openai.com/v1/chat/completions
+      cost_per_1k_tokens: 0.0006
+      privacy: low
+  routing: hybrid
+  max_daily_spend_usd: 5.0
+voice:
+  stt: faster-whisper
+  tts: piper
+  sample_rate: 16000
+trading:
+  max_position_pct: 0.10
+  max_daily_loss_pct: 0.02
+  kill_switch: true
+tax:
+  adapters: [us_federal, ir_anonymized]
+finance:
+  currency: USD
+  decimal_places: 4

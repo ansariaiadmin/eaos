@@ -1,0 +1,24 @@
+{
+ "docs": [
+  {
+   "id": "GDPR-5",
+   "text": "data minimization requires processing only necessary personal data"
+  },
+  {
+   "id": "SOX-404",
+   "text": "internal controls over financial reporting must be assessed annually"
+  },
+  {
+   "id": "IRS-6001",
+   "text": "taxpayers must keep records sufficient to establish gross income"
+  },
+  {
+   "id": "CCPA-1798",
+   "text": "consumers have the right to delete their personal information"
+  },
+  {
+   "id": "AML-314",
+   "text": "financial institutions must report suspicious transactions"
+  }
+ ]
+}
