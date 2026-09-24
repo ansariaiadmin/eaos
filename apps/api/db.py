@@ -1,5 +1,7 @@
-from sqlalchemy import create_engine, text
 import os
+
+from sqlalchemy import create_engine, text
+
 URL = os.environ.get("EAOS_DB", "sqlite:///eaos.db")
 engine = create_engine(URL, future=True)
 MIGRATIONS = [

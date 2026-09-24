@@ -1,13 +1,20 @@
 """Temporal workflows. Run: temporal server start-dev, then
 python -m packages.temporal_pkg.worker"""
 from __future__ import annotations
+
 from datetime import timedelta
+
 from temporalio import workflow
 from temporalio.common import RetryPolicy
 
 with workflow.unsafe.imports_passed_through():
-    from .activities import (run_reconciliation, run_tax_snapshot,
-                             check_trading_risk, redact_snapshot, legal_rag)
+    from .activities import (
+        check_trading_risk,
+        legal_rag,
+        redact_snapshot,
+        run_reconciliation,
+        run_tax_snapshot,
+    )
 
 @workflow.defn
 class DailyCloseWorkflow:

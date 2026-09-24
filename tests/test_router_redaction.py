@@ -1,6 +1,7 @@
 from packages.core.redaction import redact
 from packages.core.router import Router
 
+
 def test_redact_iban_email():
     out, hits = redact("pay to DE89370400440532013000 at a@b.com")
     assert "IBAN" in hits and "EMAIL" in hits and "DE8937" not in out

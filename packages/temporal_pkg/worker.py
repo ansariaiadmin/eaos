@@ -1,7 +1,10 @@
 import asyncio
+
 from temporalio.client import Client
 from temporalio.worker import Worker
-from . import workflows, activities
+
+from . import activities, workflows
+
 
 async def main():
     client = await Client.connect("localhost:7233")

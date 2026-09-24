@@ -1,6 +1,10 @@
 """Trading guardrails: position caps, loss limit, kill switch. Fail-closed."""
 from __future__ import annotations
-import yaml, pathlib
+
+import pathlib
+
+import yaml
+
 
 class TradingGuardrails:
     def __init__(self, cfg_path="configs/settings.yaml"):
@@ -13,7 +17,7 @@ class TradingGuardrails:
             return {"ok": False, "reason": "kill-switch-active"}
         max_pos = equity * self.cfg["max_position_pct"]
         if proposed_position + order_value > max_pos:
-            return {"ok": False, "reason": "position-cap %.2f" % max_pos}
+            return {"ok": False, "reason": f"position-cap {max_pos:.2f}"}
         return {"ok": True, "reason": "within-limits"}
 
     def mark_to_market(self, pnl_delta, equity=None):

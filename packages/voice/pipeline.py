@@ -1,7 +1,9 @@
 """Voice pipeline template: STT -> redact -> router -> LLM -> TTS.
 Plug faster-whisper (STT) and Piper (TTS) in production."""
 from __future__ import annotations
+
 from dataclasses import dataclass
+
 
 @dataclass
 class VoiceConfig:

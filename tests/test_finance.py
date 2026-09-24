@@ -1,6 +1,9 @@
-import pytest
 from decimal import Decimal
-from packages.core.finance import Ledger, Posting, to_minor, from_minor, LedgerError
+
+import pytest
+
+from packages.core.finance import Ledger, LedgerError, Posting, from_minor, to_minor
+
 
 def test_double_entry_balance():
     l = Ledger()

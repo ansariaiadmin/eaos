@@ -1,9 +1,13 @@
 """Deterministic finance core. Money stored as integer minor units (1e-4).
 No floats cross a ledger boundary."""
 from __future__ import annotations
-from decimal import Decimal, ROUND_HALF_UP, getcontext
+
+import datetime
+import hashlib
+import json
 from dataclasses import dataclass
-import datetime, hashlib, json
+from decimal import ROUND_HALF_UP, Decimal, getcontext
+
 getcontext().prec = 28
 CENTS = 10_000
 
@@ -48,7 +52,7 @@ class Ledger:
             raise LedgerError("entry not balanced: sum != 0")
         if any(e.id == eid for e in self.entries):
             raise LedgerError("duplicate entry id")
-        e = JournalEntry(id=eid, ts=ts or datetime.datetime.utcnow().isoformat() + "Z",
+        e = JournalEntry(id=eid, ts=ts or datetime.datetime.now(datetime.UTC).isoformat().replace("+00:00", "Z"),
                          postings=list(postings))
         e._hash = e.hash(self._prev)
         self.entries.append(e)

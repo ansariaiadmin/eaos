@@ -1,17 +1,24 @@
 """Hybrid LLM router: privacy-first, cost-aware."""
 from __future__ import annotations
-import yaml, datetime, pathlib
+
+import datetime
+import pathlib
+
+import yaml
+
 from .redaction import redact
+
 
 class Router:
     def __init__(self, cfg_path="configs/settings.yaml"):
         self.cfg = yaml.safe_load(pathlib.Path(cfg_path).read_text())
         self.spend_today = 0.0
-        self._day = datetime.date.today()
+        self._day = datetime.datetime.now(datetime.UTC).date()
 
     def _reset(self):
-        if self._day != datetime.date.today():
-            self._day, self.spend_today = datetime.date.today(), 0.0
+        today = datetime.datetime.now(datetime.UTC).date()
+        if self._day != today:
+            self._day, self.spend_today = today, 0.0
 
     def route(self, prompt, *, task_type="general", local_confidence=0.5):
         self._reset()

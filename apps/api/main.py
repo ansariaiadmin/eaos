@@ -1,12 +1,14 @@
+from decimal import Decimal
+
 from fastapi import FastAPI
 from pydantic import BaseModel
-from decimal import Decimal
-from packages.core.finance import Ledger, Posting, to_minor, from_minor
+
+from apps.api import db
+from packages.core.finance import Ledger, Posting, from_minor, to_minor
 from packages.core.router import Router
 from packages.legal.rag_agent import LegalRAGAgent
-from packages.trading.guardrails import TradingGuardrails
 from packages.tax.adapters import ADAPTERS
-import apps.api.db as db
+from packages.trading.guardrails import TradingGuardrails
 
 app = FastAPI(title="Enterprise Agent OS", version="1.0.0")
 db.upgrade()

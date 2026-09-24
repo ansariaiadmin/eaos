@@ -1,6 +1,7 @@
-from packages.trading.guardrails import TradingGuardrails
-from packages.tax.adapters import ADAPTERS
 from packages.core.finance import from_minor
+from packages.tax.adapters import ADAPTERS
+from packages.trading.guardrails import TradingGuardrails
+
 
 def test_position_cap():
     g = TradingGuardrails()
@@ -21,7 +22,8 @@ def test_daily_loss_breach_triggers_kill():
 
 def test_us_tax_bracket():
     r = ADAPTERS["us_federal"].compute(500_000_000)  # 50,000.0000
-    assert r["tax_minor"] == 57_680_000  # 11600*0.10 + 38400*0.12
+    # Correct 2024 brackets: 11600@10% + (47150-11600)@12% + (50000-47150)@22% = 6053
+    assert r["tax_minor"] == 60_530_000
 
 def test_tax_roundtrip():
     v = ADAPTERS["us_federal"].compute(100_000_000)["tax_minor"]

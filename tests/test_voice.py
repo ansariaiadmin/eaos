@@ -1,5 +1,6 @@
-from packages.voice.pipeline import VoicePipeline, VoiceConfig
 from packages.core.router import Router
+from packages.voice.pipeline import VoiceConfig, VoicePipeline
+
 
 def test_voice_roundtrip():
     vp = VoicePipeline(VoiceConfig(), Router())

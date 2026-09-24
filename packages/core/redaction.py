@@ -1,4 +1,5 @@
 import re
+
 PATTERNS = {
     "IBAN": re.compile(r"\b[A-Z]{2}\d{2}[A-Z0-9]{11,26}\b"),
     "NATIONAL_ID": re.compile(r"\b\d{10}\b"),
