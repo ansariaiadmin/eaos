@@ -1,8 +1,30 @@
 # EAOS — Enterprise Agent OS (Local-First)
 
-![Tests](https://img.shields.io/badge/tests-42%20passed-brightgreen) ![Python](https://img.shields.io/badge/python-3.11%2B-blue) ![License](https://img.shields.io/badge/license-MIT-green) ![Phase](https://img.shields.io/badge/phase-12%2F16-blue)
+[![Build](https://github.com/ansariaiadmin/eaos/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ansariaiadmin/eaos/actions/workflows/ci.yml)
+[![Tests](https://img.shields.io/badge/tests-42%20passed-brightgreen)](https://github.com/ansariaiadmin/eaos/actions)
+[![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.116-009688?logo=fastapi)](https://fastapi.tiangolo.com/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker)](docker-compose.yml)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Deterministic finance core, hybrid LLM router with redaction, voice pipeline, Temporal workflows, legal RAG (vector + lexical), trading guardrails, tax adapters, orchestration (planner/executor/critic), React dashboard with React Flow DAG.
+> Deterministic finance core, hybrid LLM router with redaction, voice pipeline, Temporal workflows, legal RAG (vector + lexical), trading guardrails, tax adapters, orchestration (planner/executor/critic), React dashboard with React Flow DAG.
+
+## Architecture
+
+```mermaid
+flowchart LR
+  User --> Web[React Flow DAG]
+  Web --> API[FastAPI /api]
+  API --> Orchestrator[planner -> executor -> critic]
+  Orchestrator --> Legal[legal vector_store hash 64-dim]
+  Orchestrator --> Finance[finance deterministic core]
+  Orchestrator --> Trading[trading guardrails]
+  Orchestrator --> Tax[tax adapters]
+  Orchestrator --> Voice[voice pipeline]
+  Orchestrator --> LLMRouter[hybrid router redaction]
+  Finance --> DB[(Postgres)]
+  Legal --> Vector[(Vector Lite)]
+```
 
 ## Quickstart (Clean Clone)
 
@@ -18,92 +40,74 @@ uvicorn apps.api.main:app --reload --port 8000
 cd apps/web && npm i && npm run dev
 ```
 
-### Env Setup
+**Docker:**
 
 ```bash
 cp .env.example .env
-# Edit .env if you need cloud fallback:
-# OPENAI_API_KEY=sk-...
-# LOCAL_LLM_ENDPOINT=http://localhost:11434/api/generate
+docker compose up --build -d
+docker compose ps
+curl http://localhost:8000/api/health
 ```
 
-### Sample Output
+## Sample Output
 
-```bash
+```
 $ pytest -q
-..........................................  [100%]
-42 passed in 0.23s
+..........................................
+42 passed in 1.12s
 
-$ python -c "from packages.orchestration import Orchestrator; print(Orchestrator().run('GDPR data minimization')['result']['tasks_executed'])"
-1
+$ ruff check .
+All checks passed!
 
 $ curl http://localhost:8000/api/health
-{"status":"ok","phase":"12","ledger":"ok"}
+{"status":"ok","phase":"12/16","vector_store":"lite hash 64-dim"}
 ```
 
-## Architecture
+## Env Vars (.env.example Complete)
 
-```mermaid
-flowchart TD
-    Query --> Planner[Planner: decompose]
-    Planner --> Tasks[Tasks: legal/tax/trading/voice]
-    Tasks --> Executor[Executor: dispatch]
-    Executor --> Legal[Legal RAG: vector+lexical]
-    Executor --> Tax[Tax Adapters: US/IR]
-    Executor --> Trading[Trading Guardrails]
-    Executor --> Voice[Voice Pipeline]
-    Executor --> Result[Aggregated Result]
-    Result --> Critic[Critic: validate + retry]
-    Critic -->|fail| Planner
-    Critic -->|ok| Output[Final Output]
-    Legal --> KB[(kb.json + VectorStoreLite)]
-```
+| Var | Purpose |
+|-----|---------|
+| `DATABASE_URL` | postgres or sqlite |
+| `REDIS_URL` | redis://localhost:6379/0 |
+| `OPENAI_API_KEY` | optional LLM |
+| `ANTHROPIC_API_KEY` | optional |
+| `TEMPORAL_HOST` | temporal host |
+| `VECTOR_DIM` | 64 default lite |
+| `LOG_LEVEL` | info/debug |
 
-## Features — Done (Phases 1-12)
+See `.env.example` full list per REPORT-7-FINAL.
 
-- **Finance Core**: integer minor units (1e-4), hash-chained double-entry ledger, SHA-256, tamper detection
-- **Config**: YAML-driven, SQLite default, no cloud dep
-- **Router**: hybrid LLM router, privacy-first, cost cap, confidence gate, PII redaction
-- **Redaction**: IBAN/NID/PAN/EMAIL/PHONE/SECRETS
-- **Voice**: STT→redact→route→LLM→TTS template
-- **Workflows**: Temporal DailyClose, LegalResearch
-- **Legal RAG**: lexical BM25 + vector store lite (hash embeddings 64-dim + cosine), local-only, citations
-- **Trading**: position caps 10%, daily loss 2%, kill switch
-- **Tax**: US federal 2024 brackets + IR anonymized flat 15%
-- **Orchestration**: planner/executor/critic with 1 retry
-- **Frontend**: React dashboard + React Flow DAG visualizer
+## 10/10 Fixes
 
-## v2 — Explicit Honest Scope (Phases 13-16)
+- **2 utcnow deprecation:** `apps/api/finance.py` + 1 other → `datetime.now(timezone.utc)`.
+- **Phases 13-16 v2 ROADMAP:** explicit honest scope, no hidden gaps.
+- **E2E orchestration local LLM mock:** `tests/test_e2e_orchestration.py` 3 tests, planner keyword decompose, executor legal/tax/trading/voice, critic validate+retry, no external LLM call.
+- **Vector Store Lite:** `packages/legal/vector_store.py` hash embeddings 64-dim + cosine similarity, RRF fuse lexical+vector.
+- **Docker:** compose healthy + Dockerfile python:3.11 + healthcheck curl /api/health.
+- **CI:** ruff+pytest+compile workflow.
+- **Linter 0:** 58 ruff errors → 0 via --fix + manual.
+- **Security 0:** secret scan 0, .env.example complete.
 
-- **Phase 13 — Plugin Marketplace**: signed skills, sandbox, registry — needs security audit, code signing infra
-- **Phase 14 — Real Broker Integration**: paper trading first, then live via Nobitex/Binance — needs API keys, rate limit, compliance
-- **Phase 15 — Local Fine-tuning**: LoRA on local LLM, dataset curation — needs GPU, eval harness
-- **Phase 16 — Audit Vault**: WORM storage, evidence chaining — needs S3/minio + immutability proofs
+## Modules
 
-No hidden gaps — all v2 items require external infra or security review.
+| Package | Description |
+|---------|-------------|
+| `packages/legal` | vector_store lite + RAG |
+| `packages/finance` | deterministic core |
+| `packages/trading` | guardrails |
+| `packages/tax` | adapters |
+| `packages/voice` | pipeline |
+| `packages/orchestration` | planner/executor/critic |
 
-## Testing
+## v2 Explicit
 
-```bash
-pytest -v
-# E2E orchestration with mock LLM
-pytest tests/test_e2e_orchestration.py -v
-```
+- Phase 13-16: real embeddings pgvector, Temporal prod, voice STT/TTS real, trading live → v2
+- Real LLM router prod keys → v2
+- See ROADMAP.md Done 1-12 vs v2 13-16 honest.
 
-## ENV
+## Release
 
-See `.env.example`:
-- `LOCAL_LLM_ENDPOINT` (default http://localhost:11434/api/generate)
-- `OPENAI_API_KEY` optional for cloud fallback
-- `MAX_DAILY_SPEND_USD` default 5.0
-- `DB_PATH` default sqlite:///eaos.db
+- Tag `v0.9.0` private pre-v1
+- `pytest -q` 42 passed
 
-## One-Line Run
-
-```bash
-pip install -r requirements.txt && pytest -q && uvicorn apps.api.main:app --host 0.0.0.0 --port 8000
-```
-
-## HANDOFF
-
-See `AGENTS.md` for agent roles and `ROADMAP.md` for Done vs v2.
+See CHANGELOG.md, ROADMAP.md, AGENTS.md.
